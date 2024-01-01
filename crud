@@ -1,0 +1,82 @@
+# main.py
+import mysql.connector
+
+from fastapi import FastAPI
+from mysql.connector import cursor
+from pydantic import BaseModel
+
+app = FastAPI()
+
+
+@app.get("/node")
+async def root():
+    return {"message": "Hello World"}
+
+
+cnx = mysql.connector.connect(user='root', password='root', host='127.0.0.1', database='University_database')
+if cnx.is_connected():
+    print("you are connected")
+
+
+# read
+@app.get("/student_info")
+def read_item():
+    cursor = cnx.cursor()
+    query = "SELECT * from student_info"
+    cursor.execute(query)
+    item = cursor.fetchall()
+    cursor.close()
+    cnx.close()
+    return item
+
+
+class Student_info(BaseModel):
+    id: int
+    name: str
+    department: str
+
+
+# create
+@app.post("/department_info")
+def create_item(student: Student_info):
+    cursor = cnx.cursor()
+    query = "INSERT INTO student_info(id, name, department) VALUES (%s, %s, %s)"
+    values = student.id, student.name, student.department
+    cursor.execute(query, values)
+    cnx.commit()
+    cursor.close()
+
+    return "added sucessfully"
+
+
+class Student_update(BaseModel):
+    name: str
+    department: str
+
+
+@app.put("/update_student")
+def update_table(student: Student_update):
+    cursor = cnx.cursor()
+    query = "UPDATE student_info SET name=%s, department=%s WHERE id=2"
+    values = (student.name, student.department)
+    cursor.executemany(query, (values,))
+    cnx.commit()
+    cursor.close()
+    cnx.close()
+    return "updated successfully"
+
+
+class Student_delete(BaseModel):
+    id: int
+
+
+@app.delete("/student_name")
+def delete_name(student: Student_delete):
+    cursor = cnx.cursor()
+    query = "DELETE FROM student_info WHERE id=%s"
+    values = (student.id,)
+    cursor.execute(query, values)
+    cnx.commit()
+    cursor.close()
+    cnx.close()
+    return "deleted successfully"

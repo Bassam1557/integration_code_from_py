@@ -1,0 +1,37 @@
+import http.client
+from fastapi import FastAPI
+import json
+import urllib.parse
+
+app = FastAPI()
+
+@app.post('/translate')
+async def translate_text():
+    conn = http.client.HTTPSConnection("text-translator2.p.rapidapi.com")
+
+    original_payload = {
+        "source_language": "en",
+        "target_language": "id",
+        "text": "What is your name?"
+    }
+
+    # Encode the payload
+    encoded_payload = urllib.parse.urlencode(original_payload)
+
+    headers = {
+        'content-type': "application/x-www-form-urlencoded",
+        'X-RapidAPI-Key': "a5bae056dfmshab48a57f0d0a5fcp1fe870jsn1176b75e8e3e",
+        'X-RapidAPI-Host': "text-translator2.p.rapidapi.com"
+    }
+
+    conn.request("POST", "/translate", encoded_payload, headers)
+    res = conn.getresponse()
+    data = res.read().decode('utf-8')  # Decoding the response to string
+
+    # Parsing the response as JSON
+    json_data = json.loads(data)
+    translated_text = json_data.get('data', {}).get('translation', {}).get('text')
+
+    conn.close()
+
+    return {"translated_text": translated_text}

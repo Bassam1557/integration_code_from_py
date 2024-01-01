@@ -1,0 +1,35 @@
+import http.client
+import json
+from fastapi import FastAPI
+
+app = FastAPI()
+
+
+class Crunch_baseAPI:
+    translation = None
+
+    def __init__(self):
+        self.translation = None
+
+
+@app.post("/searches/organizations")
+def make_request(payload: dict):
+    conn = http.client.HTTPSConnection("crunch_base-crunch_base-v1.p.rapidapi.com")
+
+    headers = {
+        'content-type': "application/json",
+        'X-RapidAPI-Key': "8b66dc65c6msh319a7396460ae98p11cde3jsn658a227c8d39",
+        'X-RapidAPI-Host': "crunch_base-crunch_base-v1.p.rapidapi.com"
+    }
+
+    conn.request("POST", "/searches/organizations", json.dumps(payload), headers)
+    res =
+    data = res.read().decode('utf-8')  # Decoding the response to string
+
+    # Parsing the response as JSON
+    json_data = json.loads(data)
+    translated_text = json_data.get('data', {}).get('translation', {}).get('text')
+
+    conn.close()
+
+    return {"translated_text": translated_text}

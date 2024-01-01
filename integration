@@ -1,0 +1,23 @@
+import http.client
+import requests
+from fastapi import FastAPI
+import json
+
+app = FastAPI()
+
+
+@app.get('/locations')
+async def loc():
+    conn = http.client.HTTPSConnection("realtor.p.rapidapi.com")
+
+    headers = {
+        'X-RapidAPI-Key': "1d02177b94msh4bdf86cc39c0608p15a9b7jsnc255a9efaf48",
+        'X-RapidAPI-Host': "realtor.p.rapidapi.com"
+    }
+
+    conn.request("GET", "/locations/v2/auto-complete?input=new%20york&limit=10", headers=headers)
+
+    res = conn.getresponse()
+    data = res.read()
+
+    return data.decode("utf-8")
